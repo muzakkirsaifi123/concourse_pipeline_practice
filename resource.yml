@@ -1,0 +1,40 @@
+ resources:
+ - name: repo
+   type: git
+   source: 
+     uri: https://github.com/muzakkirsaifi123/examples.git
+     branch: master
+ 
+ 
+ 
+ jobs:
+ - name: create-commit-job
+   plan:
+   - get: repo
+     trigger: true
+   - task: create-commit
+     config:
+       platform: linux
+       image_resource:
+         type: registry-image
+         source: 
+           repository: alpine/git
+       inputs: 
+       - name: repo
+       outputs:
+       - name: repo     
+       run:
+         path: sh
+         args:
+         - -cx
+         - |
+           cd repo
+           date +%Y-%m-%d > todays-date
+           git add ./todays-date
+           git config --global user.email mohd.saifi@knoldus.com
+           git config --global user.name muzakkkirsaifi123
+           git commit -m "update todays date"
+   - put: repo
+     params:
+       repository: repo
+    

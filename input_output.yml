@@ -1,0 +1,94 @@
+---
+resources:
+- name: every-10s
+  type: time
+  icon: clock-outline
+  source:
+    interval: 10s
+jobs:
+  - name: create-and-consume
+    plan:
+    
+      trigger: true
+    - task: make-a-file
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: busybox
+        run:
+          path: sh
+          args:
+            - -exc
+            - ls -la; echo "Created a file on $(date)" > ./files/created_file
+        outputs:
+          - name: files
+
+
+    - task: consume-the-file
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: busybox
+
+        inputs:
+          - name: files
+
+        run:
+          path: cat
+          args: 
+            - ./files/created_file
+    - task: consume-the-file-2
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: busybox
+
+        inputs:
+          - name: files
+
+        run:
+          path: cat
+          args: 
+            - ./files/created_file
+
+
+  - name: edit
+    plan:
+    trigger: true
+    - task: make-a-edit
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: busybox
+        run:
+          path: sh
+          args:
+            - -exc
+            - ls -la; echo "This is my fav file" >> ./files/created_file
+        outputs:
+          - name: files
+
+
+    - task: consume-the-file
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: busybox
+
+        inputs:
+          - name: files
+
+        run:
+          path: cat
+          args: 
+            - ./files/created_file

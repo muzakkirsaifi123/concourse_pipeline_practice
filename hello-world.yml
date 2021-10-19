@@ -1,0 +1,41 @@
+jobs:
+- name: hello-world-job
+  build_log_retention: 
+    days: 2
+    builds: 1000
+    minimum_succeeded_builds: 1
+  
+  plan:
+  - task: hello-world-task
+    config:
+      platform: linux
+      image_resource:
+        type: registry-image
+        source:
+          repository: busybox
+      outputs:
+      - name: the-artifact
+      run:
+      
+        path: sh
+        args:
+        - -cx
+        - |
+          ls -l .
+          echo "hello from another step!" > the-artifact/message
+  - task: read-the-artifact
+    config:
+      platform: linux
+      image_resource:
+        type: registry-image
+        source:
+          repository: busybox
+      inputs:
+      - name: the-artifact
+      run:
+        path: sh
+        args:
+        - -cx
+        - |
+          ls -l .
+          cat the-artifact/message

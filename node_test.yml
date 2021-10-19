@@ -1,0 +1,35 @@
+resources:
+- name: repo
+  type: git
+  source:
+    uri: https://github.com/muzakkirsaifi123/node-hello.git
+    branch: main
+
+- name: node-hello
+  type: docker-image
+  source:
+    repository: node
+    tag: 16.11-buster 
+jobs:
+- name: test
+  plan:
+  - get: repo 
+  - get: node-hello
+    trigger: true
+  - task: install
+    image: node-hello
+    config:
+      inputs:
+      - name: repo
+      outputs:
+      - name: dependencies
+        path: repo/node_modules
+      platform: linux
+      run:
+        path: /bin/bash
+        args:
+          - -ec
+          - |
+            cd repo
+            npm install
+            npm pack

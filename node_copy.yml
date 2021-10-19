@@ -1,0 +1,66 @@
+---
+resources:
+- name: repo
+  type: git
+  icon: github
+  source:
+    uri: https://github.com/muzakkirsaifi123/node-hello.git
+    branch: main
+
+- name: every-10s
+  type: time
+  icon: clock-outline
+  source:
+    interval: 10s
+
+
+jobs:
+  - name: node-hello
+    public: true
+    serial: true
+    plan:
+    - get: repo
+    - get: every-10s
+      trigger: true
+    - task: install
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source: {repository: node}
+        inputs:
+         - name: repo
+        outputs:
+          - name: dependencies
+        run:
+            path: sh
+            args:
+            - -ec
+            - |
+              cd repo
+              npm install
+              npm pack
+              npm run
+  - name: bugs
+    plan:
+    - get: repo
+    - get: every-10s
+      passed: [node-hello]
+      trigger: true
+    - task: bugs_check
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source: {repository: node}
+        inputs:
+         - name: repo
+        outputs:
+          - name: dependencies
+        run:
+            path: sh
+            args:
+            - -ec
+            - |
+              cd repo
+              npm bugs

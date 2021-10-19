@@ -1,0 +1,29 @@
+---
+resources:
+- name: repo
+  type: git
+  icon: github
+  source:
+    uri: https://github.com/muzakkirsaifi123/node-hello.git
+    branch: main
+jobs:
+  - name: node-hello
+    plan:
+    - get: repo
+      trigger: true
+    - task: install
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source: {repository: node}
+        inputs:
+         - name: repo
+        outputs:
+          - name: dependencies
+        run:
+            path: npm
+            args:
+            - pack
+            - repo
+  

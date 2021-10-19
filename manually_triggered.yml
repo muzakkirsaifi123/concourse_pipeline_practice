@@ -1,0 +1,57 @@
+---
+resources:
+- name: every-60s
+  type: time
+  icon: clock-outline
+  source:
+    interval: 60s
+
+jobs:
+- name: triggered-first
+  public: true
+  plan:
+    - get: every-60s
+      trigger: true
+    - task: simple-task
+      config:
+        platform: linux
+        image_resource:
+          type: registry-image
+          source: { repository: busybox }
+        run:
+          path: echo
+          args: ["Hello, world!"]
+
+
+- name: not-triggered
+  public: true
+  plan:
+    - get: every-60s
+      passed: [triggered-first]
+      trigger: true
+    - task: simple-task
+      config:
+        platform: linux
+        image_resource:
+          type: registry-image
+          source: { repository: busybox }
+        run:
+          path: echo
+          args: ["Hello, world!"]
+
+
+- name: triggered-second
+  public: true
+  plan:
+    - get: every-60s
+      passed: [not-triggered]
+      trigger: true
+    - task: simple-task
+      config:
+        platform: linux
+        image_resource:
+          type: registry-image
+          source: { repository: busybox }
+        run:
+          path: echo
+          args: ["Hello, world!"]
